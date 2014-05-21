@@ -7,22 +7,29 @@ using System;
 public class GetVenues : MonoBehaviour {
 
 	enum State{ 
-		GETTING_VENUES,
+		UPDATING_VENUES,
 		FOURSQUARE_NOT_CONNECTED,
 		FOURSQUARE_CONNECT_PENDING,
+		VENUES_UPDATED,
+		GETTING_VENUES,
 		VENUES_RECEIVED,
+		GETTING_VENUES_FAILED,
 		NO_VENUE_RECEIVED
 	};
 
 	int numVenues = 0;
 
+	ICollection<ParseObject> venues;
+
 	State state;
 
-	// Use this for initialization
 	void Start () {
 
+		//state = State.UPDATING_VENUES;
+		//FetchVenues();
+
 		state = State.GETTING_VENUES;
-		FetchVenues();
+		GetVenueDetails();
 
 
 	}
@@ -34,8 +41,8 @@ public class GetVenues : MonoBehaviour {
 
 	void OnGUI(){
 		string state_text = "";
-		if (state == State.GETTING_VENUES) {
-			state_text = "Getting venues...";	
+		if (state == State.UPDATING_VENUES) {
+			state_text = "Updating venues...";	
 		} else if(state == State.FOURSQUARE_NOT_CONNECTED) {
 			state_text = "Foursquare not connected.";
 			if(GUI.Button(new Rect(20,50,160,30),"Connect Foursquare")){
@@ -45,28 +52,79 @@ public class GetVenues : MonoBehaviour {
 		} else if(state == State.FOURSQUARE_CONNECT_PENDING) {
 			state_text = "Waiting for foursquare connection.";	
 			if(GUI.Button(new Rect(20,50,160,30),"Check Again")){
-				state = State.GETTING_VENUES;
+				state = State.UPDATING_VENUES;
 				FetchVenues();
 			}
 		} else if(state == State.NO_VENUE_RECEIVED) {
 			state_text = "Seems like connected foursquare account does not manage any venues.";	
 			if(GUI.Button(new Rect(20,50,160,30),"Check Again")){
-				state = State.GETTING_VENUES;
+				state = State.UPDATING_VENUES;
 				FetchVenues();
 			}
+		}else if(state == State.VENUES_UPDATED){
+
+			state = State.GETTING_VENUES;
+			GetVenueDetails();
+
+
+		}else if(state == State.GETTING_VENUES){
+
+			if(numVenues>1){
+				state_text = "Getting venue details for "+numVenues+" venue"+((numVenues>1)?"s":"")+"...";
+			}else{
+				state_text = "Getting venue details ...";
+			}
+
 		}else if(state == State.VENUES_RECEIVED){
-			state_text = "Downloading details for "+numVenues+" venue"+((numVenues>1)?"s":"");
+
+			if(venues == null || venues.Count<=0){
+				state_text = "No managed venues found";
+
+				if(GUI.Button(new Rect(20,50,160,30),"Update Managed Venues")){
+					state = State.UPDATING_VENUES;
+					FetchVenues();
+				}
+
+			}else{
+
+				state_text = "Received "+numVenues+" venue"+((numVenues>1)?"s":"")+", select One.";
+
+				var offset = 50;
+				var margin = 10;
+				var h_margin = 20;
+				var venueButtonHeight = 50;
+
+				IList venueList = venues as IList;
+
+				for(var i = 0; i<numVenues; i++){
+
+					ParseObject venue = (ParseObject)venueList[i];
+					var venueName = venue.Get<string>("name");
+					var venueAddress = venue.Get<string>("address");
+					var venueText = venueName+" "+venueAddress;
+
+					if(GUI.Button(new Rect(h_margin,offset,Screen.width-h_margin*2,venueButtonHeight),venueText)){
+						SelectVenue(venue);
+					}
+					offset += (margin+venueButtonHeight);
+				}
+			}
+
 		}
+
+		// print
 		GUI.Label (new Rect (20, 20, 500, 30), state_text);
+	}
+
+	void SelectVenue(ParseObject venue){
+		Debug.Log ("sel");
 	}
 
 	void FetchVenues(){
 
-		Debug.Log ("getting venues...");
-
 		try{
 			
-			ParseCloud.CallFunctionAsync<string> ("venues", new Dictionary<string, object>())
+			ParseCloud.CallFunctionAsync<string> ("updateVenues", new Dictionary<string, object>())
 				.ContinueWith(t =>{
 
 					Debug.Log(t.Result);
@@ -82,7 +140,7 @@ public class GetVenues : MonoBehaviour {
 						if(numVenues<=0){
 							state = State.NO_VENUE_RECEIVED;
 						}else{
-							state = State.VENUES_RECEIVED;
+							state = State.VENUES_UPDATED;
 						}
 
 					}
@@ -97,6 +155,30 @@ public class GetVenues : MonoBehaviour {
 			Debug.Log("error "+e.Message);
 		}
 		
+
+	}
+
+	void GetVenueDetails(){
+
+		ParseUser.CurrentUser.FetchAsync().ContinueWith(t =>{
+
+			var relation = ParseUser.CurrentUser.GetRelation<ParseObject>("venues");
+			var query = relation.Query;
+
+
+			query.FindAsync().ContinueWith(t2 =>{
+
+				if (t.IsFaulted || t.IsCanceled){
+					state = State.GETTING_VENUES_FAILED;
+				}else{
+					venues = (ICollection<ParseObject>)t2.Result;
+					numVenues = venues.Count;
+					state = State.VENUES_RECEIVED;
+				}
+			});
+
+		});
+
 
 	}
 }
