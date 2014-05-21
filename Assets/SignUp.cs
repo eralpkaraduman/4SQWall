@@ -83,6 +83,7 @@ public class SignUp : MonoBehaviour {
 		ParseUser user = new Parse.ParseUser ();
 		user ["password"] = _password;
 		user ["username"] = _email;
+		user ["email"] = _email;
 
 		try{
 			user.SignUpAsync ().ContinueWith (t => {

@@ -130,6 +130,8 @@ public class GetVenues : MonoBehaviour {
 
 	void FetchVenues(){
 
+
+
 		try{
 			
 			ParseCloud.CallFunctionAsync<string> ("updateVenues", new Dictionary<string, object>())
@@ -143,13 +145,26 @@ public class GetVenues : MonoBehaviour {
 						
 					}else{
 
+						if(t.Result == "ERROR"){
 
-						Int32.TryParse(t.Result.Split(':')[1],out numVenues);
-						if(numVenues<=0){
-							state = State.NO_VENUE_RECEIVED;
+							state = State.FOURSQUARE_NOT_CONNECTED;
+							Debug.Log("Fetch venues error");
+
 						}else{
-							state = State.VENUES_UPDATED;
+
+							Debug.Log("Fetch venues success");
+
+							Int32.TryParse(t.Result.Split(':')[1],out numVenues);
+							if(numVenues<=0){
+								state = State.NO_VENUE_RECEIVED;
+							}else{
+								state = State.VENUES_UPDATED;
+							}
 						}
+
+
+
+
 
 					}
 					
@@ -158,7 +173,7 @@ public class GetVenues : MonoBehaviour {
 				});
 
 		}catch(InvalidOperationException e){
-
+			Debug.Log("NEFLGSK2");
 			state = State.FOURSQUARE_NOT_CONNECTED;
 			Debug.Log("error "+e.Message);
 		}

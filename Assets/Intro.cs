@@ -13,6 +13,7 @@ public class Intro : MonoBehaviour {
 	public string password;
 	string message = "";
 	bool networkIdle = true; 
+	bool sendingResetEmail = false;
 
 	// Use this for initialization
 	void Start () {
@@ -58,12 +59,34 @@ public class Intro : MonoBehaviour {
 
 		GUI.Label (new Rect (20, (y += 40), 260, 30),message);
 
-		if(GUI.Button(new Rect(20, (y+=50), 260, 30), "Sign Up")) {
+		if(GUI.Button(new Rect(20, (y+=50), 120, 30), "Sign Up")) { //20
 			Application.LoadLevel("SignUp");
 		};
 
+		GUI.enabled = !sendingResetEmail;
+		if(GUI.Button(new Rect(160, y, 120, 30), "Reset Password")) { //20
+			message = "Sending password reset e-mail...";
+			sendingResetEmail = true;
+			ResetPasswordWithEmail(email);
+		};
+		GUI.enabled = networkIdle;
+
 		GUI.EndGroup ();
 	
+	}
+
+	void ResetPasswordWithEmail(string _email){
+		ParseUser.RequestPasswordResetAsync (_email).ContinueWith (t => {
+
+			if (t.IsFaulted || t.IsCanceled)
+			{
+				message = "Could not send password reset e-mail.";
+			}else{
+				message = "Sent password reset e-mail.";
+			}
+
+			sendingResetEmail = false;
+		});
 	}
 
 	void ParseSignIn(string _username, string _password){
