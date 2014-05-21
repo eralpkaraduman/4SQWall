@@ -17,6 +17,10 @@ public class GetVenues : MonoBehaviour {
 		NO_VENUE_RECEIVED
 	};
 
+
+
+	public static ParseObject selectedVenue = null; 
+
 	int numVenues = 0;
 
 	ICollection<ParseObject> venues;
@@ -40,6 +44,7 @@ public class GetVenues : MonoBehaviour {
 	}
 
 	void OnGUI(){
+
 		string state_text = "";
 		if (state == State.UPDATING_VENUES) {
 			state_text = "Updating venues...";	
@@ -87,7 +92,7 @@ public class GetVenues : MonoBehaviour {
 
 			}else{
 
-				state_text = "Received "+numVenues+" venue"+((numVenues>1)?"s":"")+", select One.";
+				state_text = "Received "+numVenues+" venue"+((numVenues>1)?"s":"")+", select one.";
 
 				var offset = 50;
 				var margin = 10;
@@ -114,10 +119,13 @@ public class GetVenues : MonoBehaviour {
 
 		// print
 		GUI.Label (new Rect (20, 20, 500, 30), state_text);
+
+
 	}
 
 	void SelectVenue(ParseObject venue){
-		Debug.Log ("sel");
+		selectedVenue = venue;
+
 	}
 
 	void FetchVenues(){
