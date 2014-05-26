@@ -2,6 +2,9 @@
 using System.Collections;
 using SocketIOClient;
 using System;
+using SimpleJson;
+using System.Reflection;
+using System.Collections.Generic;
 
 public class SocketTest : MonoBehaviour {
 
@@ -30,53 +33,59 @@ public class SocketTest : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (client.IsConnected) {
-			//Debug.Log("con");
+
+		bool connected = false;
+		if (client!=null) {
+			if (client.IsConnected) {
+				connected = true;
+			}
 		}
 
+		Debug.Log("connnected: "+connected);
 	}
 
 	private void SocketMessage (object sender, MessageEventArgs e) {
+
 		Debug.Log ("socket message received");
 
-		if (e != null) {
-			string eventName = e.Message.Event;
-			Debug.Log("event : "+eventName);
-		}
-
-
-
-
-
-		/*
 		if ( e!= null && e.Message.Event == "message") {
 
-
-
-
-			string msg = e.Message.MessageText;
-			Debug.Log("msg "+msg);
-			//process(msg);
-		}else if(e==null){
-			Debug.Log("e is null");
-		}else{
+			string subscribed = (string)e.Message.Json.args[0];
+			if(subscribed == "SUBSCRIPTION:SUCCESS"){
+				Debug.Log("Subscribed");
+			}else if(subscribed == "SUBSCRIPTION:FAILED"){
+				Debug.Log("Subscription Failed");
+			}
 
 		}
-		*/
+
 	}
 
-	private void SocketOpened(object sender, EventArgs e) {
 
+	
+	private void SocketOpened(object sender, EventArgs e) {
+		
 		Debug.Log ("socket opened");
-		//invoke when socket opened
+
+		string uid = "4564756";
+		string t = "1234";
+
+		object data = new {
+			method= "subscribe",
+			user_id = uid,
+			subscription_token = t
+		};
+
+		string jsonData = SimpleJson.SimpleJson.SerializeObject (data);
+
+		client.Send (jsonData);
+
+
 	}
 
 	private void SocketConnectionClosed (object sender, EventArgs e) {
 		Debug.Log ("SocketConnectionClosed");
 	}
-
-
-
 
 	private void SocketError (object sender, ErrorEventArgs e) {
 		Debug.Log ("socket error "+e.Message);
@@ -84,4 +93,9 @@ public class SocketTest : MonoBehaviour {
 
 	}
 
+	void OnApplicationQuit ()//close connection while application is being destroyed
+	{
+		client.Close ();
+	}
+	
 }
