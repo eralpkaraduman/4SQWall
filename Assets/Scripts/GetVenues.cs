@@ -126,11 +126,10 @@ public class GetVenues : MonoBehaviour {
 	void SelectVenue(ParseObject venue){
 		selectedVenue = venue;
 
+		Application.LoadLevel ("Wall");
 	}
 
 	void FetchVenues(){
-
-
 
 		try{
 			
