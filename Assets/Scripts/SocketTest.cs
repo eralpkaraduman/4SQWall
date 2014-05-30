@@ -61,8 +61,6 @@ public class SocketTest : MonoBehaviour {
 
 	}
 
-
-	
 	private void SocketOpened(object sender, EventArgs e) {
 		
 		Debug.Log ("socket opened");

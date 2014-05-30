@@ -1,30 +1,44 @@
 ﻿using UnityEngine;
 using System.Collections;
 using SocketIOClient;
+using SocketIOClient.Messages;
 using System;
 using SimpleJson;
 using System.Reflection;
 using System.Collections.Generic;
 using Parse;
+using Boomlagoon.JSON;
+using System.Text;
 
 public class SocketConnection : MonoBehaviour {
 
-	public string socketServerRoot = "http://127.0.0.1:3000";
+	public string socketServerRoot = "http://54.204.2.155:3456";
+	//public string socketServerRoot = "http://127.0.0.1:3000";
 	protected static string subscription_token = null;
 	ParseObject selectedVenue;
+
+	Client client = null;
 
 	public enum SocketStatus{
 		SUBSCRIBING,
 		DISCONNECTED,
 		CONNECTING,
-		FETCHING_USER
-
+		CONNECTED,
+		CONNECTED_REGISTERING_SESSION,
+		FETCHING_USER,
+		ERROR,
+		CONNECTED_SUBSCRIBED,
+		CONNECTED_COULD_NOT_SUBSCRIBE
 	}
 
 	public SocketStatus socketStatus;
 
 	// Use this for initialization
 	void Start () {
+
+		if (client!=null) {
+			client.Close ();
+		}
 
 		socketStatus = SocketStatus.DISCONNECTED;
 
@@ -35,7 +49,7 @@ public class SocketConnection : MonoBehaviour {
 
 	void OnGUI(){
 	
-		GUI.Label (new Rect ( 10, Screen.height - 30, 200, 30), "SOCKET: " + socketStatus);
+		GUI.Label (new Rect ( 10, Screen.height - 30, 400, 30), "SOCKET: " + socketStatus);
 
 	}
 
@@ -46,33 +60,108 @@ public class SocketConnection : MonoBehaviour {
 
 	void Connect(){
 
-		if (subscription_token == null) {
-		
-			Subscribe();
+		if (client!=null) {
+			client.Close ();
+		}
 
+		if (subscription_token == null) {
+			Subscribe();
+			return;
 		}
 
 		socketStatus = SocketStatus.CONNECTING;
 
+		Debug.Log ("connecting...");
 
-		/*
+
 		client = new Client (socketServerRoot+"?subscription_token="+subscription_token);
-		
-		//Client client = new Client ("http://localhost:3000");
-
-		
-		
 		client.Opened += SocketOpened;
-		client.Message += SocketMessage;
 		client.SocketConnectionClosed += SocketConnectionClosed;
 		client.Error +=SocketError;
-		
-		
-		Debug.Log ("connecting..");
-		client.Connect ();
+		client.Message += SocketMessage;
 
-		*/
+		client.Connect ();
 	}
+
+	private void SocketMessage (object sender, MessageEventArgs e) {
+		
+		Debug.Log ("socket message received");
+
+		if ( e!= null && e.Message.Event == "message") {
+
+			string rawMessage = e.Message.MessageText;
+
+			Debug.Log("raw "+rawMessage);
+
+			JSONObject jsonMessage = null;
+
+			try{
+				jsonMessage = JSONObject.Parse(rawMessage);
+			}catch(InvalidOperationException exception){
+
+				jsonMessage = null;
+				Debug.Log("could not parse response json");
+			}
+
+			if(jsonMessage!=null){
+				Debug.Log("parsed json message");
+				JSONArray argArray = jsonMessage.GetArray("args");
+				JSONValue messageJSON = argArray[0];
+				JSONObject messageObject = JSONObject.Parse(messageJSON.ToString());
+				HandleSocketMessage(messageObject);
+
+			}
+				
+		}
+
+	}
+
+	void HandleSocketMessage(JSONObject messageObject){
+	
+		string method = messageObject.GetString ("method");
+
+		if (method == "register_session") {
+
+			HandleRegisterSession(messageObject);
+
+		}else if(method == "check_in_received") {
+
+			HandleCheckInReceived(messageObject);
+		}
+
+	}
+
+
+	void HandleRegisterSession(JSONObject messageObject){
+
+		Boolean subscribed = messageObject.GetBoolean("subscribed");
+		
+		if(subscribed == true){
+			socketStatus = SocketStatus.CONNECTED_SUBSCRIBED;
+		}else{
+			socketStatus = SocketStatus.CONNECTED_COULD_NOT_SUBSCRIBE;
+		}
+
+	}
+
+	void HandleCheckInReceived(JSONObject messageObject){
+		
+		//Boolean subscribed = messageObject.GetBoolean("subscribed");
+		
+		Debug.Log("HandleCheckInReceived");
+
+		Debug.Log ("type: "+messageObject.GetString("type"));
+
+		/*
+		if(subscribed == true){
+			socketStatus = SocketStatus.CONNECTED_SUBSCRIBED;
+		}else{
+			socketStatus = SocketStatus.CONNECTED_COULD_NOT_SUBSCRIBE;
+		}
+		*/
+		
+	}
+
 
 	void Subscribe(){
 		socketStatus = SocketStatus.FETCHING_USER;
@@ -91,34 +180,81 @@ public class SocketConnection : MonoBehaviour {
 
 				subscription_token = (string)user["subscriptionToken"];
 
+
 				Connect();
 
-
-				
 
 			});
 
 		});
 
+	}
+
+	private void SocketOpened(object sender, EventArgs e) {
 
 
+		Debug.Log ("SocketOpened");
 
+		socketStatus = SocketStatus.CONNECTED_REGISTERING_SESSION;
 
 		/*
-		Parse.ParseUser.CurrentUser["subscribedVenueId"] = null;
-		Parse.ParseUser.CurrentUser.SaveAsync().ContinueWith(t =>{
-			
-			if (t.IsFaulted || t.IsCanceled){
-				
-				foursquareAccountStatus = FoursquareAccountStatus.GETTING_ACCOUNT_DETAILS_FAILED;
-				
-			}else{
-				
-				foursquareAccountStatus = FoursquareAccountStatus.NOT_CONNECTED;
-			}
-			
-		});
+
+		
+
+		
+		//string jsonData = SimpleJson.SimpleJson.SerializeObject (data);
+
+		Debug.Log ("sending..");
+		client.Send (new JSONMessage (data,0,"register_session"));
+		//client.Send (jsonData);
 
 		*/
+
+		/*
+
+
+		JSONObject data = new JSONObject ();
+		data.Add ("method","register_session");
+		data.Add ("user_id",(string)user["objectId"]);
+		data.Add ("subscription_token",subscription_token);
+		*/
+
+		//ParseUser user = ParseUser.CurrentUser;
+
+		//string userId = "adgfhf";//user.Get<string>("objectId");
+
+
+		JSONObject data = new JSONObject ();
+		data.Add ("method","register_session");
+		data.Add ("user_id",ParseUser.CurrentUser.ObjectId);
+		data.Add ("subscription_token",subscription_token);
+
+		Debug.Log ("sending..");
+		//client.Send (new JSONMessage (data,0,"register_session"));
+		client.Send (data.ToString());
+		
 	}
+
+	private void SocketConnectionClosed (object sender, EventArgs e) {
+		//Debug.Log ("SocketConnectionClosed");
+
+		socketStatus = SocketStatus.DISCONNECTED;
+	}
+
+	private void SocketError (object sender, ErrorEventArgs e) {
+		Debug.Log ("socket connection error");
+
+		socketStatus = SocketStatus.ERROR;
+		
+		
+	}
+
+	void OnApplicationQuit ()//close connection while application is being destroyed
+	{
+		if (client != null) {
+			client.Close ();
+		}
+
+	}
+
 }
