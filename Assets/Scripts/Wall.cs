@@ -10,7 +10,13 @@ public class Wall : MonoBehaviour {
 	public SocketConnection socketConnection;
 	public CheckinSpawner spawner;
 
+	public GameObject currentCheckinAlert;
+
 	private WallState state;
+
+
+	Queue<ParseObject> checkinAlertQueue = new Queue<ParseObject>();
+	
 
 	enum WallState{
 		GETTING_VENUE,
@@ -25,6 +31,10 @@ public class Wall : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+
+		socketConnection.checkInReceived += onSocketCheckinReceived;
+
+		socketConnection.Begin ();
 
 		ReloadCheckins ();
 		//spawner.reloadWheelWithParseObjects (null);
@@ -101,10 +111,49 @@ public class Wall : MonoBehaviour {
 
 			//spawner.reloadWheelWithParseObjects(checkinList);
 
-
 		});
 
 
+	}
+
+	public void onSocketCheckinReceived(JSONObject jsonCheckin){
+
+		ReloadCheckins ();
+
+		ParseObject checkin = new ParseObject("Checkin");
+
+		checkin ["objectId"] = jsonCheckin.GetString ("objectId");
+		checkin ["foursquareId"] = jsonCheckin.GetString ("foursquareId");
+		checkin ["userFirstName"] = jsonCheckin.GetString ("userFirstName");
+		checkin ["cretedAtFoursquare"] = jsonCheckin.GetNumber ("cretedAtFoursquare");
+		checkin ["userGender"] = jsonCheckin.GetString ("userGender");
+		checkin ["userPhotoPrefix"] = jsonCheckin.GetString ("userPhotoPrefix");
+		checkin ["userPhotoSuffix"] = jsonCheckin.GetString ("userPhotoSuffix");
+		checkin ["userlastName"] = jsonCheckin.GetString ("userlastName");
+		checkin ["foursquareTimeZoneOffset"] = jsonCheckin.GetNumber ("foursquareTimeZoneOffset");
+		checkin ["venueFoursquareId"] = jsonCheckin.GetString ("venueFoursquareId");
+
+		QueueCheckinAlert (checkin);
+
+	}
+
+	void QueueCheckinAlert(ParseObject checkin){
+
+		checkinAlertQueue.Enqueue (checkin);
+
+		AlertCheckins ();
+
+	}
+
+	void AlertCheckins(){
+		if (currentCheckinAlert != null) {
+			return;
+		}
+
+		ParseObject checkin = checkinAlertQueue.Dequeue ();
+		if (checkin!=null) {
+			
+		}
 	}
 
 	public static long UnixTimestampFromDateTime(DateTime date)
@@ -114,9 +163,15 @@ public class Wall : MonoBehaviour {
 		return unixTimestamp;
 	}
 
-	public static DateTime DateTimeFromUnixTimeStamp(long timeStamp){
 
-		var dt = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(Math.Round(timeStamp / 1000d)).ToLocalTime();
-		return dt;
+
+	public static DateTime DateTimeFromUnixTimeStamp(long unixTimestamp)
+	{
+		DateTime unixYear0 = new DateTime(1970, 1, 1);
+		long unixTimeStampInTicks = unixTimestamp * TimeSpan.TicksPerSecond;
+		DateTime dtUnix = new DateTime(unixYear0.Ticks + unixTimeStampInTicks);
+		return dtUnix;
 	}
+
+
 }

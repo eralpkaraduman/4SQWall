@@ -19,6 +19,9 @@ public class SocketConnection : MonoBehaviour {
 
 	Client client = null;
 
+	public delegate void OnNewCheckinReceived(JSONObject jsonCheckin);
+	public OnNewCheckinReceived checkInReceived;  
+
 	public enum SocketStatus{
 		SUBSCRIBING,
 		DISCONNECTED,
@@ -49,6 +52,7 @@ public class SocketConnection : MonoBehaviour {
 		selectedVenue = GetVenues.selectedVenue;
 		
 		Connect ();
+
 	}
 
 	void OnGUI(){
@@ -155,6 +159,15 @@ public class SocketConnection : MonoBehaviour {
 		Debug.Log("HandleCheckInReceived");
 
 		Debug.Log ("type: "+messageObject.GetString("type"));
+
+
+		if(messageObject.GetString("type") == "checkin"){
+
+			checkInReceived(messageObject);
+
+		}else{
+			Debug.Log("received checkin has no type = checkin");
+		}
 
 		/*
 		if(subscribed == true){

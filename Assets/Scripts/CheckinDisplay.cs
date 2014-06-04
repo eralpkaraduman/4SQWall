@@ -41,6 +41,8 @@ public class CheckinDisplay : MonoBehaviour {
 
 		orderNumberTextMesh.text = "" + (index+1);
 
+		if (checkin == null) return;
+
 		string firstName = "";
 		string lastName = "";
 		long fsCreated = 0;
@@ -57,14 +59,17 @@ public class CheckinDisplay : MonoBehaviour {
 				lastName = (string)checkin[key];
 			}
 
-			if(key == "createdAtFoursquare"){
-				fsCreated = (long)checkin["createdAtFoursquare"];
+			if(key == "cretedAtFoursquare"){
+				fsCreated = (long)checkin["cretedAtFoursquare"];
 			}
 
 			if(key == "foursquareTimeZoneOffset"){
 				fsOffset = (long)checkin["foursquareTimeZoneOffset"];
 			}
 		}
+
+		Debug.Log ("cre "+fsCreated);
+		Debug.Log ("off "+fsOffset);
 
 		string fullName = firstName +" "+ lastName;
 
@@ -80,15 +85,15 @@ public class CheckinDisplay : MonoBehaviour {
 	}
 
 	void printTime(long timestamp,long offset){
-		timestamp = timestamp - offset;
 
+		timestamp += offset*60;
 		DateTime date = Wall.DateTimeFromUnixTimeStamp (timestamp);
 		string formattedDate = date.ToString("HH:mm:ss");
+
 		timeTextMesh.text = formattedDate;
 	}
 
 	void Update () {
-
 
 		float distance = Vector3.Distance (Camera.main.transform.position,this.transform.position);
 

@@ -36,8 +36,11 @@ public class CheckinSpawner : MonoBehaviour {
 
 		ClearOldWheel ();
 
-		//int numCheckIns = 44;
-		int numCheckIns = checkinList.Count;
+		int numCheckIns = 5; // Test Mode
+
+		if (checkinList != null) {
+			numCheckIns = checkinList.Count;
+		}
 
 		float radius = (numCheckIns * minSpaceForCheckin) / (Mathf.PI * 2);
 		if (radius < minRadius) radius = minRadius;
@@ -54,7 +57,10 @@ public class CheckinSpawner : MonoBehaviour {
 
 			int index = i;
 
-			ParseObject checkin = (ParseObject)checkinList[i];
+			ParseObject checkin = null;
+			if(checkinList != null){
+				checkin = (ParseObject)checkinList[i];
+			}
 
 			spawnWithParseObject(checkin,index,numCheckIns,radius);
 
