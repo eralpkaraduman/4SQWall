@@ -2,6 +2,7 @@
 using System.Collections;
 using Boomlagoon.JSON;
 using Parse;
+using System;
 
 public class CheckinDisplay : MonoBehaviour {
 
@@ -9,6 +10,7 @@ public class CheckinDisplay : MonoBehaviour {
 	public Renderer profilePictureRenderer;
 	public TextMesh userNameTextMesh;
 	public TextMesh orderNumberTextMesh;
+	public TextMesh timeTextMesh;
 	public Shader ProfilePicureShader;
 
 	public Color nameNearColor;
@@ -41,6 +43,8 @@ public class CheckinDisplay : MonoBehaviour {
 
 		string firstName = "";
 		string lastName = "";
+		long fsCreated = 0;
+		long fsOffset = 0;
 
 		foreach (string key in checkin.Keys) {
 			//Debug.Log("k "+key);
@@ -53,7 +57,13 @@ public class CheckinDisplay : MonoBehaviour {
 				lastName = (string)checkin[key];
 			}
 
+			if(key == "createdAtFoursquare"){
+				fsCreated = (long)checkin["createdAtFoursquare"];
+			}
 
+			if(key == "foursquareTimeZoneOffset"){
+				fsOffset = (long)checkin["foursquareTimeZoneOffset"];
+			}
 		}
 
 		string fullName = firstName +" "+ lastName;
@@ -61,12 +71,21 @@ public class CheckinDisplay : MonoBehaviour {
 
 		userNameTextMesh.text = fullName;
 
+		printTime (fsCreated,fsOffset);
+
 		string pictureURL = (string)checkin["userPhotoPrefix"] + "512x512" + (string)checkin["userPhotoSuffix"];
 
 		StartCoroutine (LoadPicture (pictureURL));
 
 	}
-	
+
+	void printTime(long timestamp,long offset){
+		timestamp = timestamp - offset;
+
+		DateTime date = Wall.DateTimeFromUnixTimeStamp (timestamp);
+		string formattedDate = date.ToString("HH:mm:ss");
+		timeTextMesh.text = formattedDate;
+	}
 
 	void Update () {
 

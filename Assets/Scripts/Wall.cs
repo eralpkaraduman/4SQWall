@@ -54,8 +54,8 @@ public class Wall : MonoBehaviour {
 
 		var relation = user.GetRelation<ParseObject> ("subscribedVenue");
 
-		relation.Query.FirstAsync().ContinueWith(t =>
-		                                 {
+		relation.Query.FirstAsync().ContinueWith(t =>{
+
 			ParseObject venue = t.Result;
 			GetCheckinsOfVenue(venue);
 
@@ -112,5 +112,11 @@ public class Wall : MonoBehaviour {
 		long unixTimestamp = date.Ticks - new DateTime(1970, 1, 1).Ticks;
 		unixTimestamp /= TimeSpan.TicksPerSecond;
 		return unixTimestamp;
+	}
+
+	public static DateTime DateTimeFromUnixTimeStamp(long timeStamp){
+
+		var dt = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(Math.Round(timeStamp / 1000d)).ToLocalTime();
+		return dt;
 	}
 }
