@@ -39,15 +39,31 @@ public class CheckinDisplay : MonoBehaviour {
 
 		orderNumberTextMesh.text = "" + (index+1);
 
-		userNameTextMesh.text = (string)checkin["userFirstName"];
+		string firstName = "";
+		string lastName = "";
+
+		foreach (string key in checkin.Keys) {
+			//Debug.Log("k "+key);
+
+			if(key == "userFirstName"){
+				firstName = (string)checkin[key];
+			}
+
+			if(key == "userlastName"){
+				lastName = (string)checkin[key];
+			}
+
+
+		}
+
+		string fullName = firstName +" "+ lastName;
+
+
+		userNameTextMesh.text = fullName;
 
 		string pictureURL = (string)checkin["userPhotoPrefix"] + "512x512" + (string)checkin["userPhotoSuffix"];
 
-
-
 		StartCoroutine (LoadPicture (pictureURL));
-
-
 
 	}
 	
@@ -57,7 +73,7 @@ public class CheckinDisplay : MonoBehaviour {
 
 		float distance = Vector3.Distance (Camera.main.transform.position,this.transform.position);
 
-		if (distance < 100) {
+		if (distance < 120) {
 
 			userNameTextMesh.color = nameNearColor;
 

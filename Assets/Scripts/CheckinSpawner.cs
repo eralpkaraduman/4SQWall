@@ -12,7 +12,7 @@ public class CheckinSpawner : MonoBehaviour {
 	int i = 0;
 
 	float minRadius = 90;
-	float minSpaceForCheckin = 80; 
+	float minSpaceForCheckin = 100; 
 	float scrollSpeed = 50.0f;
 
 
