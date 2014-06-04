@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Boomlagoon.JSON;
+using Parse;
 
 
 
@@ -10,7 +11,7 @@ public class CheckinSpawner : MonoBehaviour {
 
 	int i = 0;
 
-	float minRadius = 50;
+	float minRadius = 90;
 	float minSpaceForCheckin = 80; 
 	float scrollSpeed = 50.0f;
 
@@ -26,28 +27,17 @@ public class CheckinSpawner : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		//float rotatedAngle = 
-		//wheel.transform.eulerAngles = new Vector3 (rotatedAngle,180,180);
-
-		//transform.Rotate(Vector3.left * Time.deltaTime * speed);
-
-
 		wheel.transform.Rotate(Vector3.right * Time.deltaTime * scrollSpeed, Space.World);
 
-		/*
-		if (display != null) {
-			i++;
-			if(i>=40)i=0;
-			display.transform.localPosition = GetWheelPosition(i,40);
-		}
-		*/
 	}
 
-	public void reloadWheelWithJSONArray(JSONArray JSONArray){
+
+	public void reloadWheelWithParseObjects(ArrayList checkinList){
 
 		ClearOldWheel ();
 
-		int numCheckIns = 44;
+		//int numCheckIns = 44;
+		int numCheckIns = checkinList.Count;
 
 		float radius = (numCheckIns * minSpaceForCheckin) / (Mathf.PI * 2);
 		if (radius < minRadius) radius = minRadius;
@@ -64,18 +54,23 @@ public class CheckinSpawner : MonoBehaviour {
 
 			int index = i;
 
-			spawnWithJSONObject(null,index,numCheckIns,radius);
+			ParseObject checkin = (ParseObject)checkinList[i];
+
+			spawnWithParseObject(checkin,index,numCheckIns,radius);
 
 		}
 
 	}
 
-	public void spawnWithJSONObject(JSONObject jsonObject,int index, int total,float radius){
+				
+
+
+	public void spawnWithParseObject(ParseObject checkin,int index, int total,float radius){
 		//CheckinDisplay checkin = (CheckinDisplay)Instantiate (checkinDisplayPrefab.transform);
 
 		CheckinDisplay display = (CheckinDisplay)GameObject.Instantiate (checkinDisplayPrefab,new Vector3(0,0,0),Quaternion.identity);
 
-		display.configureWithJSONObject (index,null);
+		display.configureWithParseObject(index,checkin);
 
 		display.transform.parent = wheel.transform;
 

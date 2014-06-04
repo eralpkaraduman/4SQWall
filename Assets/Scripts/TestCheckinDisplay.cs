@@ -13,7 +13,7 @@ public class TestCheckinDisplay : MonoBehaviour {
 			Destroy(testInstance.gameObject);
 		}
 
-		checkinSpawner.reloadWheelWithJSONArray (null);
+		checkinSpawner.reloadWheelWithParseObjects (null);
 	}
 	
 	// Update is called once per frame
@@ -32,7 +32,7 @@ public class TestCheckinDisplay : MonoBehaviour {
 			//checkinSpawner.spawnWithJSONObject();
 			//checkinSpawner.spawnWithJSONObject(null);
 
-			checkinSpawner.reloadWheelWithJSONArray (null);
+			checkinSpawner.reloadWheelWithParseObjects (null);
 		};
 
 	}

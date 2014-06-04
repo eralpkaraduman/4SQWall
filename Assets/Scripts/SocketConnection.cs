@@ -36,14 +36,18 @@ public class SocketConnection : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
+		socketStatus = SocketStatus.DISCONNECTED;
+	}
+
+	public void Begin(){
 		if (client!=null) {
 			client.Close ();
 		}
-
+		
 		socketStatus = SocketStatus.DISCONNECTED;
-
+		
 		selectedVenue = GetVenues.selectedVenue;
-
+		
 		Connect ();
 	}
 
