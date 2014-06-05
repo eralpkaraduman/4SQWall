@@ -21,7 +21,64 @@ public class CheckinAlert : MonoBehaviour {
 	float positionYTarget = 0.0f;
 	public bool dismissed = false;
 
+
+	IEnumerator LoadPicture(string url) {
+		
+		Debug.Log ("loading.. "+url);
+		
+		WWW www = new WWW(url);
+		yield return www;
+		
+		Debug.Log ("LOADED "+url);
+		
+		Material newMat = new Material (ProfilePicureShader);
+		newMat.mainTexture = www.texture;
+		profilePictureRenderer.material = newMat;
+	}
+
 	public void configure(ParseObject checkin){
+
+		if (checkin == null) return;
+		
+		string firstName = "";
+		string lastName = "";
+		long fsCreated = 0;
+		long fsOffset = 0;
+		
+		foreach (string key in checkin.Keys) {
+			//Debug.Log("k "+key);
+			
+			if(key == "userFirstName"){
+				firstName = (string)checkin[key];
+			}
+			
+			if(key == "userlastName"){
+				lastName = (string)checkin[key];
+			}
+
+			/*
+			if(key == "cretedAtFoursquare"){
+				fsCreated = (long)checkin["cretedAtFoursquare"];
+			}
+			
+			if(key == "foursquareTimeZoneOffset"){
+				fsOffset = (long)checkin["foursquareTimeZoneOffset"];
+			}
+			*/
+		}
+		
+		//string fullName = firstName +" "+ lastName;
+		string fullName = firstName;
+
+		userNameTextMesh.text = fullName;
+		
+		string pictureURL = (string)checkin["userPhotoPrefix"] + "512x512" + (string)checkin["userPhotoSuffix"];
+
+
+		Debug.Log ("fullName "+fullName);
+		Debug.Log ("PURL "+pictureURL);
+
+		StartCoroutine (LoadPicture (pictureURL));
 		
 	}
 

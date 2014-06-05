@@ -78,8 +78,6 @@ public class Wall : MonoBehaviour {
 
 		});
 
-
-
 	}
 
 	void GetCheckinsOfVenue(ParseObject venue){
@@ -115,10 +113,6 @@ public class Wall : MonoBehaviour {
 			Debug.Log("Retrieved "+checkinList.Count+" check ins");
 
 			state = WallState.CHECKINS_RETRIEVED;
-
-
-
-			//spawner.reloadWheelWithParseObjects(checkinList);
 
 		});
 

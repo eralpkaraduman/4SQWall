@@ -42,8 +42,6 @@ public class TestCheckinDisplay : MonoBehaviour {
 			//checkinSpawner.spawnWithJSONObject();
 			//checkinSpawner.spawnWithJSONObject(null);
 
-
-
 			checkinSpawner.alertNewCheckIn(null,alertParentTransform);
 
 		}
