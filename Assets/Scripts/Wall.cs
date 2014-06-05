@@ -9,14 +9,10 @@ public class Wall : MonoBehaviour {
 
 	public SocketConnection socketConnection;
 	public CheckinSpawner spawner;
-
 	public GameObject currentCheckinAlert;
-
 	private WallState state;
 
-
-	Queue<ParseObject> checkinAlertQueue = new Queue<ParseObject>();
-	
+	public Transform alertPivot;
 
 	enum WallState{
 		GETTING_VENUE,
@@ -109,6 +105,8 @@ public class Wall : MonoBehaviour {
 
 			state = WallState.CHECKINS_RETRIEVED;
 
+
+
 			//spawner.reloadWheelWithParseObjects(checkinList);
 
 		});
@@ -133,27 +131,11 @@ public class Wall : MonoBehaviour {
 		checkin ["foursquareTimeZoneOffset"] = jsonCheckin.GetNumber ("foursquareTimeZoneOffset");
 		checkin ["venueFoursquareId"] = jsonCheckin.GetString ("venueFoursquareId");
 
-		QueueCheckinAlert (checkin);
+		//Debug.Log ("implement spawner.alertNewCheckIn (checkin)");
 
-	}
+		spawner.alertNewCheckIn (checkin,alertPivot);
+		//QueueCheckinAlert (checkin);
 
-	void QueueCheckinAlert(ParseObject checkin){
-
-		checkinAlertQueue.Enqueue (checkin);
-
-		AlertCheckins ();
-
-	}
-
-	void AlertCheckins(){
-		if (currentCheckinAlert != null) {
-			return;
-		}
-
-		ParseObject checkin = checkinAlertQueue.Dequeue ();
-		if (checkin!=null) {
-			
-		}
 	}
 
 	public static long UnixTimestampFromDateTime(DateTime date)

@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System;
 using Boomlagoon.JSON;
 using Parse;
 
@@ -9,16 +11,28 @@ public class CheckinSpawner : MonoBehaviour {
 
 	public GameObject wheel;
 
+	public delegate void onAlertQueueCompleted();
+	public onAlertQueueCompleted OnAlertQueueCompleted;
+
+	Queue<ParseObject> checkinAlertQueue = new Queue<ParseObject>();
+
+
+
 	int i = 0;
 
 	float minRadius = 90;
 	float minSpaceForCheckin = 100; 
-	float scrollSpeed = 50.0f;
+	float scrollSpeed = 40.0f;
+
+	private Transform alertParentTransform;
 
 
 	//CheckinDisplay display;
 
 	public CheckinDisplay checkinDisplayPrefab;
+	public CheckinAlert checkinAlertPrefab;
+	private CheckinAlert currentAlert = null;
+
 	// Use this for initialization
 	void Start () {
 		
@@ -68,11 +82,49 @@ public class CheckinSpawner : MonoBehaviour {
 
 	}
 
-				
+	public void alertNewCheckIn(ParseObject checkin,Transform parentTransform){
 
+		if (checkin == null) { // test mode
+
+			checkin = new ParseObject("Checkin");
+
+		}
+
+		alertParentTransform = parentTransform;
+		checkinAlertQueue.Enqueue(checkin);
+		alertFromQueue ();
+		Debug.Log ("alert queue: "+checkinAlertQueue.Count);
+	}
+
+	public void alertFromQueue(){
+
+		if (currentAlert != null) return;
+
+		if (checkinAlertQueue.Count <= 0) {
+
+			OnAlertQueueCompleted();
+
+			return;
+		}
+
+		ParseObject checkin = checkinAlertQueue.Dequeue ();
+
+		CheckinAlert alert = (CheckinAlert)GameObject.Instantiate (checkinAlertPrefab,new Vector3(0,0,0),Quaternion.identity);
+		alert.configure (checkin);
+		alert.OnDestroyed += onAlertDestroyed;
+		alert.transform.parent = alertParentTransform;
+		alert.transform.localPosition = Vector3.zero;
+		alert.transform.localEulerAngles = Vector3.zero;
+		currentAlert = alert;
+
+	}
+
+	public void onAlertDestroyed(){
+		currentAlert = null;
+		alertFromQueue ();
+	}
 
 	public void spawnWithParseObject(ParseObject checkin,int index, int total,float radius){
-		//CheckinDisplay checkin = (CheckinDisplay)Instantiate (checkinDisplayPrefab.transform);
 
 		CheckinDisplay display = (CheckinDisplay)GameObject.Instantiate (checkinDisplayPrefab,new Vector3(0,0,0),Quaternion.identity);
 
@@ -103,10 +155,29 @@ public class CheckinSpawner : MonoBehaviour {
 		wheel = new GameObject ();
 		wheel.transform.parent = this.transform;
 
-		/*
-		while (wheel.transform.childCount>0) {
-			GameObject.Destroy(wheel.transform.GetChild(0).gameObject);
-		}
-		*/
 	}
+
+
+	/*
+
+	void QueueCheckinAlert(ParseObject checkin){
+
+		checkinAlertQueue.Enqueue (checkin);
+
+		AlertCheckins ();
+
+	}
+
+	void AlertCheckins(){
+		if (currentCheckinAlert != null) {
+			return;
+		}
+
+		ParseObject checkin = checkinAlertQueue.Dequeue ();
+		if (checkin!=null) {
+			
+		}
+	}
+
+	*/
 }
