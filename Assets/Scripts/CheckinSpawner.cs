@@ -5,8 +5,6 @@ using System;
 using Boomlagoon.JSON;
 using Parse;
 
-
-
 public class CheckinSpawner : MonoBehaviour {
 
 	public GameObject wheel;

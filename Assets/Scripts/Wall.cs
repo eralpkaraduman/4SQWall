@@ -12,13 +12,17 @@ public class Wall : MonoBehaviour {
 	public GameObject currentCheckinAlert;
 	private WallState state;
 
+	private ParseObject lastCheckinReceived = null;
+
 	public Transform alertPivot;
 
 	enum WallState{
 		GETTING_VENUE,
 		GETTING_CHECK_INS,
 		CHECKINS_RETRIEVED,
-		CHECKINS_PROCESSED
+		CHECKINS_PROCESSED,
+		SOCKET_CHECKIN_RECEIVED,
+		SOCKET_CHECKIN_PROCESSED
 	}
 
 	long timeStamp = 0;
@@ -28,10 +32,10 @@ public class Wall : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
+		spawner.OnAlertQueueCompleted += spawnerAlertQueueCompleted;
+
 		socketConnection.checkInReceived += onSocketCheckinReceived;
-
 		socketConnection.Begin ();
-
 		ReloadCheckins ();
 		//spawner.reloadWheelWithParseObjects (null);
 	}
@@ -41,6 +45,13 @@ public class Wall : MonoBehaviour {
 		if (state == WallState.CHECKINS_RETRIEVED) {
 			spawner.reloadWheelWithParseObjects(checkinList);
 			state = WallState.CHECKINS_PROCESSED;
+		}
+
+		if (state == WallState.SOCKET_CHECKIN_RECEIVED) {
+
+			state = WallState.SOCKET_CHECKIN_PROCESSED;
+			spawner.alertNewCheckIn (lastCheckinReceived,alertPivot);
+
 		}
 	}
 
@@ -111,12 +122,9 @@ public class Wall : MonoBehaviour {
 
 		});
 
-
 	}
 
 	public void onSocketCheckinReceived(JSONObject jsonCheckin){
-
-		ReloadCheckins ();
 
 		ParseObject checkin = new ParseObject("Checkin");
 
@@ -131,10 +139,8 @@ public class Wall : MonoBehaviour {
 		checkin ["foursquareTimeZoneOffset"] = jsonCheckin.GetNumber ("foursquareTimeZoneOffset");
 		checkin ["venueFoursquareId"] = jsonCheckin.GetString ("venueFoursquareId");
 
-		//Debug.Log ("implement spawner.alertNewCheckIn (checkin)");
-
-		spawner.alertNewCheckIn (checkin,alertPivot);
-		//QueueCheckinAlert (checkin);
+		lastCheckinReceived = checkin;
+		state = WallState.SOCKET_CHECKIN_RECEIVED;
 
 	}
 
@@ -145,8 +151,6 @@ public class Wall : MonoBehaviour {
 		return unixTimestamp;
 	}
 
-
-
 	public static DateTime DateTimeFromUnixTimeStamp(long unixTimestamp)
 	{
 		DateTime unixYear0 = new DateTime(1970, 1, 1);
@@ -154,6 +158,14 @@ public class Wall : MonoBehaviour {
 		DateTime dtUnix = new DateTime(unixYear0.Ticks + unixTimeStampInTicks);
 		return dtUnix;
 	}
+
+
+	public void spawnerAlertQueueCompleted(){
+
+		ReloadCheckins ();
+	
+	}
+
 
 
 }
