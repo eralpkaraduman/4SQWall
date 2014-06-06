@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Parse;
+using System;
 
 public class CheckinAlert : MonoBehaviour {
 
 	public Renderer profilePictureRenderer;
 	public TextMesh userNameTextMesh;
 	public Shader ProfilePicureShader;
+
+	public float duration = 5.2f;
 
 	public delegate void onDestroyed();
 	public onDestroyed OnDestroyed;
@@ -28,7 +31,7 @@ public class CheckinAlert : MonoBehaviour {
 		
 		WWW www = new WWW(url);
 		yield return www;
-		
+
 		Debug.Log ("LOADED "+url);
 		
 		Material newMat = new Material (ProfilePicureShader);
@@ -38,6 +41,8 @@ public class CheckinAlert : MonoBehaviour {
 
 	public void configure(ParseObject checkin){
 
+		if ((bool)checkin ["isDummy"] == true) return;
+
 		if (checkin == null) return;
 		
 		string firstName = "";
@@ -46,8 +51,7 @@ public class CheckinAlert : MonoBehaviour {
 		long fsOffset = 0;
 		
 		foreach (string key in checkin.Keys) {
-			//Debug.Log("k "+key);
-			
+
 			if(key == "userFirstName"){
 				firstName = (string)checkin[key];
 			}
@@ -56,15 +60,6 @@ public class CheckinAlert : MonoBehaviour {
 				lastName = (string)checkin[key];
 			}
 
-			/*
-			if(key == "cretedAtFoursquare"){
-				fsCreated = (long)checkin["cretedAtFoursquare"];
-			}
-			
-			if(key == "foursquareTimeZoneOffset"){
-				fsOffset = (long)checkin["foursquareTimeZoneOffset"];
-			}
-			*/
 		}
 		
 		//string fullName = firstName +" "+ lastName;
@@ -73,7 +68,6 @@ public class CheckinAlert : MonoBehaviour {
 		userNameTextMesh.text = fullName;
 		
 		string pictureURL = (string)checkin["userPhotoPrefix"] + "512x512" + (string)checkin["userPhotoSuffix"];
-
 
 		Debug.Log ("fullName "+fullName);
 		Debug.Log ("PURL "+pictureURL);
@@ -94,7 +88,7 @@ public class CheckinAlert : MonoBehaviour {
 		if (dismissing == false) {
 
 			timer += Time.deltaTime;
-			if (timer > 3) {
+			if (timer > duration) {
 				dismissing = true;
 
 				positionYTarget = -70;
@@ -107,7 +101,11 @@ public class CheckinAlert : MonoBehaviour {
 			if(contentPivot.position.y - positionYTarget <= (easing/3)){
 				dismissed = true;
 
-				OnDestroyed();
+				try{
+					OnDestroyed();
+				}catch(NullReferenceException e){
+				
+				}
 
 				GameObject.Destroy(this.gameObject);
 

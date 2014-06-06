@@ -16,6 +16,9 @@ public class Wall : MonoBehaviour {
 
 	public Transform alertPivot;
 
+	private float reloadTimer = 0;
+	public float reloadInterval = 5*60;
+
 	enum WallState{
 		GETTING_VENUE,
 		GETTING_CHECK_INS,
@@ -52,6 +55,16 @@ public class Wall : MonoBehaviour {
 			state = WallState.SOCKET_CHECKIN_PROCESSED;
 			spawner.alertNewCheckIn (lastCheckinReceived,alertPivot);
 
+		}
+
+
+		reloadTimer += Time.deltaTime;
+		if (reloadTimer > reloadInterval) {
+
+			ReloadCheckins();
+
+			reloadTimer = 0;
+			
 		}
 	}
 

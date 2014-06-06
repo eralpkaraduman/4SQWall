@@ -12,6 +12,8 @@ public class CheckinSpawner : MonoBehaviour {
 	public delegate void onAlertQueueCompleted();
 	public onAlertQueueCompleted OnAlertQueueCompleted;
 
+	private float minimumScreenHeight = 500;
+
 	Queue<ParseObject> checkinAlertQueue = new Queue<ParseObject>();
 
 
@@ -33,7 +35,7 @@ public class CheckinSpawner : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
+		Debug.Log ("SH "+Screen.height);
 	}
 	
 	// Update is called once per frame
@@ -63,7 +65,9 @@ public class CheckinSpawner : MonoBehaviour {
 
 		Camera.main.farClipPlane = radius*4.0f;
 
-		scrollSpeed =  Screen.height / (2 * Mathf.PI * radius) * 50;
+
+
+		scrollSpeed =  minimumScreenHeight / (2 * Mathf.PI * radius) * 50;
 
 		for (int i=0; i<numCheckIns; i++) {
 
@@ -85,7 +89,11 @@ public class CheckinSpawner : MonoBehaviour {
 		if (checkin == null) { // test mode
 
 			checkin = new ParseObject("Checkin");
+			checkin ["isDummy"] = true;
 
+		}else{
+		
+			checkin ["isDummy"] = false;
 		}
 
 		alertParentTransform = parentTransform;
