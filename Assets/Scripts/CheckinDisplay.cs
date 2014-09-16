@@ -110,7 +110,7 @@ public class CheckinDisplay : MonoBehaviour {
 
 			userNameTextMesh.color = nameFarColor;
 
-			Vector3 pos = transform.parent.position;
+			Vector3 pos = this.transform.parent.position;
 			pos.z *= 10;
 
 			transform.LookAt(pos);

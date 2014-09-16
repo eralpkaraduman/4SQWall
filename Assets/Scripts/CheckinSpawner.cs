@@ -22,7 +22,7 @@ public class CheckinSpawner : MonoBehaviour {
 
 	float minRadius = 90;
 	float minSpaceForCheckin = 100; 
-	float scrollSpeed = 40.0f;
+	float scrollSpeed = 10.0f;
 
 	private Transform alertParentTransform;
 
@@ -59,7 +59,10 @@ public class CheckinSpawner : MonoBehaviour {
 		float radius = (numCheckIns * minSpaceForCheckin) / (Mathf.PI * 2);
 		if (radius < minRadius) radius = minRadius;
 
-		Vector3 wheelPos = new Vector3 (0, 0, radius);
+		Vector3 wheelPos = new Vector3 (this.transform.position.x, this.transform.position.y, radius);
+
+
+
 		wheel.transform.position = wheelPos;
 		wheel.transform.localEulerAngles = new Vector3 (0, 180, 180);
 

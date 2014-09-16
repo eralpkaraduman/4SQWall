@@ -43,11 +43,14 @@ public class SignUp : MonoBehaviour {
 
 		float y = 30;
 		GUI.Label (new Rect(20,y,260,20),"Email:");
-		email = GUI.TextField(new Rect(20, (y+=20), 260, 30), email, 25);
+
+
+
+		email = GUI.TextField(new Rect(20, (y+=20), 260, 30), email, 100);
 		GUI.Label (new Rect(20,(y+=40),260,20),"Password:");
-		password = GUI.TextField(new Rect(20, (y+=20), 260, 30), password, 25);
+		password = GUI.TextField(new Rect(20, (y+=20), 260, 30), password, 100);
 		GUI.Label (new Rect(20,(y+=40),260,20),"Password Again:");
-		password2 = GUI.TextField(new Rect(20, (y+=20), 260, 30), password2, 25);
+		password2 = GUI.TextField(new Rect(20, (y+=20), 260, 30), password2, 100);
 
 		GUI.enabled = true;
 

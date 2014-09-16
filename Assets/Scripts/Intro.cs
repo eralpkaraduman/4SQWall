@@ -49,9 +49,9 @@ public class Intro : MonoBehaviour {
 		float y = 30;
 
 		GUI.Label (new Rect(20,y,260,20),"Email:");
-		email = GUI.TextField(new Rect(20, (y+=20), 260, 30), email, 25);
+		email = GUI.TextField(new Rect(20, (y+=20), 260, 30), email, 100);
 		GUI.Label (new Rect(20,(y+=40),260,20),"Password:");
-		password = GUI.TextField(new Rect(20, (y+=20), 260, 30), password, 25);
+		password = GUI.TextField(new Rect(20, (y+=20), 260, 30), password, 100);
 		if (GUI.Button (new Rect (20, (y += 50), 260, 30), "Sign In")) {
 			message = "Signing In...";
 			ParseSignIn(email,password);
@@ -59,9 +59,11 @@ public class Intro : MonoBehaviour {
 
 		GUI.Label (new Rect (20, (y += 40), 260, 30),message);
 
+		/* to dissable signup */ GUI.enabled = false;
 		if(GUI.Button(new Rect(20, (y+=50), 120, 30), "Sign Up")) { //20
 			Application.LoadLevel("SignUp");
 		};
+		/* to dissable signup */ GUI.enabled = networkIdle;
 
 		GUI.enabled = !sendingResetEmail;
 		if(GUI.Button(new Rect(160, y, 120, 30), "Reset Password")) { //20
