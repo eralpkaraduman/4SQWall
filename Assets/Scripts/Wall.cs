@@ -71,10 +71,12 @@ public class Wall : MonoBehaviour {
 	}
 
 	void OnGUI(){
+
+
 		if (state != WallState.CHECKINS_PROCESSED) {
 
 			Color oldColor = GUI.color;
-			Color color = Color.white;
+			Color color = Color.black;
 			color.a = 0.5f;
 			GUI.color = color;
 			GUI.Label (new Rect (20, 20, 400, 30), state.ToString ());

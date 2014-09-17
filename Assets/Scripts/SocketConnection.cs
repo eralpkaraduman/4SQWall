@@ -57,6 +57,8 @@ public class SocketConnection : MonoBehaviour {
 
 	void OnGUI(){
 	
+		GUI.color = Color.black;
+
 		GUI.Label (new Rect ( 10, Screen.height - 30, 400, 30), "SOCKET: " + socketStatus);
 
 	}

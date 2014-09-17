@@ -45,6 +45,8 @@ public class GetVenues : MonoBehaviour {
 
 	void OnGUI(){
 
+		GUI.color = Color.black;
+
 		string state_text = "";
 		if (state == State.UPDATING_VENUES) {
 			state_text = "Updating venues...";	
@@ -100,13 +102,15 @@ public class GetVenues : MonoBehaviour {
 				var venueButtonHeight = 50;
 
 				IList venueList = venues as IList;
-
+				GUI.color = Color.white;
 				for(var i = 0; i<numVenues; i++){
 
 					ParseObject venue = (ParseObject)venueList[i];
 					var venueName = venue.Get<string>("name");
 					var venueAddress = venue.Get<string>("address");
 					var venueText = venueName+" "+venueAddress;
+
+
 
 					if(GUI.Button(new Rect(h_margin,offset,Screen.width-h_margin*2,venueButtonHeight),venueText)){
 						SelectVenue(venue);
@@ -116,6 +120,8 @@ public class GetVenues : MonoBehaviour {
 			}
 
 		}
+
+		GUI.color = Color.black;
 
 		// print
 		GUI.Label (new Rect (20, 20, 500, 30), state_text);

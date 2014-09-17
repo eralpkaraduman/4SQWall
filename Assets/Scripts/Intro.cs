@@ -14,6 +14,7 @@ public class Intro : MonoBehaviour {
 	string message = "";
 	bool networkIdle = true; 
 	bool sendingResetEmail = false;
+	public bool registrationDisabled = false;
 
 	// Use this for initialization
 	void Start () {
@@ -37,6 +38,8 @@ public class Intro : MonoBehaviour {
 
 	void OnGUI(){
 
+		GUI.color = Color.black;
+
 		GUI.enabled = networkIdle;
 		
 		GUI.BeginGroup (new Rect (Screen.width/2-formWidth/2,
@@ -59,11 +62,11 @@ public class Intro : MonoBehaviour {
 
 		GUI.Label (new Rect (20, (y += 40), 260, 30),message);
 
-		/* to dissable signup */ GUI.enabled = false;
+		if(registrationDisabled) GUI.enabled = false;
 		if(GUI.Button(new Rect(20, (y+=50), 120, 30), "Sign Up")) { //20
 			Application.LoadLevel("SignUp");
 		};
-		/* to dissable signup */ GUI.enabled = networkIdle;
+		GUI.enabled = networkIdle;
 
 		GUI.enabled = !sendingResetEmail;
 		if(GUI.Button(new Rect(160, y, 120, 30), "Reset Password")) { //20
