@@ -86,13 +86,10 @@ public class GetVenues : MonoBehaviour {
 
 			if(venues == null || venues.Count<=0){
 				state_text = "No managed venues found";
+			}
 
-				if(GUI.Button(new Rect(20,50,160,30),"Update Managed Venues")){
-					state = State.UPDATING_VENUES;
-					FetchVenues();
-				}
-
-			}else{
+				
+			//}else{
 
 				state_text = "Received "+numVenues+" venue"+((numVenues>1)?"s":"")+", select one.";
 
@@ -117,7 +114,13 @@ public class GetVenues : MonoBehaviour {
 					}
 					offset += (margin+venueButtonHeight);
 				}
+			//}
+
+			if(GUI.Button(new Rect(h_margin,offset,Screen.width-h_margin*2,venueButtonHeight),"Update Managed Venues")){
+				state = State.UPDATING_VENUES;
+				FetchVenues();
 			}
+
 
 		}
 
@@ -137,12 +140,14 @@ public class GetVenues : MonoBehaviour {
 
 	void FetchVenues(){
 
+		Debug.Log("updateVenues...");
+
 		try{
 			
 			ParseCloud.CallFunctionAsync<string> ("updateVenues", new Dictionary<string, object>())
 				.ContinueWith(t =>{
 
-					Debug.Log(t.Result);
+					Debug.Log("updateVenues r:"+t.Result);
 
 					if (t.IsFaulted || t.IsCanceled){
 
