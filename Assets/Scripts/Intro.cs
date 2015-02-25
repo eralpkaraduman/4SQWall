@@ -38,7 +38,7 @@ public class Intro : MonoBehaviour {
 
 	void OnGUI(){
 
-		GUI.color = Color.black;
+		GUI.color = Color.white;
 
 		GUI.enabled = networkIdle;
 		
